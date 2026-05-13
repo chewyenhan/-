@@ -191,7 +191,7 @@ const script = {
         text: "<b>【三级会议的骗局】</b><br>凡尔赛宫内，路易十六坚持‘一级一票’——教士与贵族总能2比1稳赢。平民代表要求‘按人头计票’，被粗暴拒绝。",
         btns: [
             { t: "愤而退席！宣布成立‘国民议会’", next: "TENNIS_COURT", effect: () => { gameState.revolution += 15; gameState.royalAuthority -= 30; } },
-            { t: "在场内继续争取，最后被卫兵驱逐", next: "TENNIS_COURT", effect: () => { gameState.anger += 20; gameState.royalAuthority += 20; } }
+            { t: "在场内继续争取", next: "TENNIS_COURT", effect: () => { gameState.anger += 20; gameState.royalAuthority += 20; } }
         ]
     },
 
