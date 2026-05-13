@@ -33,14 +33,8 @@
 
 ## 🚀 快速开始
 ### 本地运行
-直接双击 `index.html` 即可运行。推荐使用 Python 开启静态服务器：
-```bash
-python -m http.server 5173
-```
 
 ### 配置 AI 核心
 进入游戏后，输入您的 **Gemini API Key** 即可开启智能对话功能。
-
----
 
 *由 Antigravity 协助优化与构建。致敬那个追求自由、平等、博爱的时代。*
