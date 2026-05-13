@@ -531,4 +531,15 @@ function showP(id) {
     }
 }
 
+// 卷轴弹窗控制
+function showScroll() {
+    document.getElementById('scroll-modal').style.display = 'flex';
+    playEffect();
+}
+
+function closeScroll() {
+    document.getElementById('scroll-modal').style.display = 'none';
+    playEffect();
+}
+
 // 请确保这是文件的最后一行，后面不要再有任何符号了

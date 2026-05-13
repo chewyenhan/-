@@ -28,6 +28,35 @@
     </div>
 
     <button class="sys-btn" style="background: gold; color: #8b0000; font-size: 3em; height: 150px; margin-top: 20px;" onclick="initAll()">⚔️ 开启历史体验 ⚔️</button>
+    <button class="sys-btn" style="background: #fff; color: #8b0000; font-size: 1.5em; margin-top: 15px; border-color: gold;" onclick="showScroll()">📜 查看开发初衷与指南</button>
+</div>
+
+<!-- 卷轴弹窗 -->
+<div id="scroll-modal" class="modal-overlay" onclick="closeScroll()">
+    <div class="scroll-container" onclick="event.stopPropagation()">
+        <div class="scroll-content">
+            <h1>📜 开发初衷与指南</h1>
+            <div class="scroll-text">
+                <h3>🎓 教学适配</h3>
+                <p>本作专为<b>马来西亚华文独中《初一历史》</b>课程设计。通过沉浸式互动，帮助学生复习法国大革命的关键考点（三级会议、国民议会、巴士底狱等）。</p>
+                
+                <h3>✍️ 制作者信息</h3>
+                <p><b>作者：</b>朱彦翰<br><b>学校：</b>华联中学 (Hua Lian High School)</p>
+                
+                <h3>🔌 Gemini AI 配置指南</h3>
+                <p>1. 访问 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #8b0000;">Google AI Studio</a> 获取您的 API Key。<br>
+                   2. 在首页输入框粘贴 Key 并点击“检测加载”。<br>
+                   3. 建议选择 Gemini 1.5 系列模型以获得更智能的国王对话体验。</p>
+                
+                <h3>🎮 游戏机制</h3>
+                <p>玩家将扮演代表民意的不同阶层。在凡尔赛宫，你与路易十六的每一次对话都会影响<b>革命值</b>、<b>王权值</b>与<b>愤怒值</b>。只有明智的选择才能导向更好的结局。</p>
+                
+                <p style="text-align: center; margin-top: 20px;">
+                    <button class="sys-btn" style="width: auto; padding: 10px 30px;" onclick="closeScroll()">合上卷轴</button>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="p-setup" class="panel">
