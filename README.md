@@ -28,13 +28,34 @@
 
 ## 🛠️ 技术架构
 - **Frontend**: 纯前端架构 (HTML5, CSS3, Vanilla JavaScript)
-- **AI Engine**: Google Gemini API
+- **AI Engine**: Google Gemini API（通过 Cloudflare Worker 代理）
 - **Deployment**: 完美适配 GitHub Pages 静态部署
 
-## 🚀 快速开始
-### 本地运行
+## 🚀 部署指南
 
-### 配置 AI 核心
-进入游戏后，输入您的 **Gemini API Key** 即可开启智能对话功能。
+### 第一步：部署 Cloudflare Worker（AI 代理）
+> 把 API Key 藏在 Worker 里，学生打开网页就能玩，无需手动输入 Key。
+
+1. 获取免费 Gemini API Key：https://aistudio.google.com/apikey
+2. 注册/登录 Cloudflare：https://dash.cloudflare.com（免费账户即可）
+3. Cloudflare Dashboard → Workers & Pages → 创建 Worker
+4. 将 `worker.js` 的内容粘贴进去
+5. 在 Worker 设置 → Variables → 添加环境变量：
+   - 变量名: `GEMINI_API_KEY`
+   - 值: 你的 Gemini API Key
+6. 部署，获得 Worker URL（形如 `https://paris-ai.你的用户名.workers.dev`）
+
+### 第二步：配置游戏
+1. 打开 `game.js`
+2. 将第一行的 `WORKER_URL` 改为你的 Worker URL：
+   ```js
+   const WORKER_URL = 'https://paris-ai.你的用户名.workers.dev';
+   ```
+
+### 第三步：部署游戏
+直接推送到 GitHub Pages，或本地用 `devserver.ps1` 启动。
+
+## 🚀 快速开始（学生端）
+学生打开网页即玩，无需任何配置。AI 对话功能自动可用。
 
 *由 Antigravity 协助优化与构建。致敬那个追求自由、平等、博爱的时代。*

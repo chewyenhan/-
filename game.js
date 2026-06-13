@@ -11,7 +11,9 @@ const gameState = {
     choiceHistory: []    // 关键选择记录，用于结局复盘
 };
 
-let customApiKey = ""; let gData = []; let cIdx = -1; let aiCnt = 0;
+// Cloudflare Worker 代理地址（部署后替换为实际 URL）
+const WORKER_URL = 'https://paris-ai.chewyenhan.workers.dev';
+let gData = []; let cIdx = -1; let aiCnt = 0;
 let speechVolume = 0.8;
 let speakSeq = 0;
 
@@ -248,12 +250,6 @@ function runScene(sid) {
         document.getElementById('choice-area').style.display = 'none';
         document.getElementById('ai-area').style.display = 'flex';
         speak("路易十六冷冷地开口：朕的旨意就是法律。你们这些卑微的平民，到底想要什么？");
-        // 没有配置 API 时，允许课堂演示直接进入巴士底狱与结局
-        if (!customApiKey) {
-            const fr = document.getElementById('final-revolt');
-            fr.innerText = "⚠️ 未设置API：直接进入巴士底狱（课堂演示）";
-            fr.style.display = 'block';
-        }
     } else if (sid === "ENDING") {
         playEffect();
         txt.innerHTML = buildEndingHtml();
@@ -390,32 +386,51 @@ function buildEndingHtml() {
 // 5. API 通信与对话系统 (保持稳定)
 // ==========================================
 async function detectModels() {
-    const keyInput = document.getElementById('api-key-input').value.trim();
-    if(!keyInput) { alert("请先输入 API Key！"); return; }
-    customApiKey = keyInput;
+    // 通过 Worker 代理获取模型列表，无需用户手动输入 API Key
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${customApiKey}`);
+        const response = await fetch(`${WORKER_URL}/models`);
         const data = await response.json();
         const select = document.getElementById('model-select');
         select.innerHTML = '';
-        data.models.forEach(m => {
-            if(m.name.includes('gemini')) {
+        if (data.models) {
+            data.models.forEach(m => {
+                if(m.name.includes('gemini')) {
+                    const opt = document.createElement('option');
+                    opt.value = m.name.replace('models/', '');
+                    opt.text = m.displayName || m.name;
+                    select.appendChild(opt);
+                }
+            });
+        }
+        // 如果 Worker 不可用，提供默认模型选项
+        if (select.innerHTML === '') {
+            ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'].forEach(m => {
                 const opt = document.createElement('option');
-                opt.value = m.name.replace('models/', '');
-                opt.text = m.displayName || m.name;
+                opt.value = m;
+                opt.text = m;
                 select.appendChild(opt);
-            }
+            });
+        }
+        select.style.display = 'inline-block';
+    } catch (err) {
+        console.warn("Worker 模型检测失败，使用默认模型列表", err);
+        const select = document.getElementById('model-select');
+        select.innerHTML = '';
+        ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'].forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.text = m;
+            select.appendChild(opt);
         });
         select.style.display = 'inline-block';
-        alert("✅ API 检测成功！");
-    } catch (err) { alert("❌ 检测失败"); }
+    }
 }
 
 async function chatWithKing() {
     const inp = document.getElementById('ai-input');
     const box = document.getElementById('chat-box');
     const msg = inp.value.trim();
-    if(!msg || !customApiKey) return;
+    if(!msg) return;
     if (aiCnt >= 3) return;
     if (inp && inp.disabled) return;
     const sendBtn = document.getElementById('ai-send-btn');
@@ -423,14 +438,15 @@ async function chatWithKing() {
 
     box.innerHTML += `<div class='msg user'><b>代表:</b> ${msg}</div>`;
     inp.value = '';
-    
+
     const prompt = buildKingPrompt(msg);
     const model = document.getElementById('model-select').value;
-    
+
     try {
-        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${customApiKey}`, {
+        const resp = await fetch(`${WORKER_URL}/gemini`, {
             method: 'POST',
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model, contents: [{ parts: [{ text: prompt }] }] })
         });
         const data = await resp.json();
         const replay = data.candidates[0].content.parts[0].text;
