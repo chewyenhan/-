@@ -20,21 +20,20 @@ export default {
 
     const corsHeaders = { 'Access-Control-Allow-Origin': '*' };
 
-    // --- 端点 1: 获取模型列表 ---
+    // --- 端点 1: 获取模型列表（内置常用模型，避免免费 Key 无法调用 list 接口）---
     if (url.pathname === '/models' && request.method === 'GET') {
-      try {
-        const resp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${env.GEMINI_API_KEY}`
-        );
-        return new Response(await resp.text(), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } catch (e) {
-        return new Response(JSON.stringify({ error: '获取模型列表失败' }), {
-          status: 502,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
+      const models = {
+        models: [
+          { name: 'models/gemini-2.5-flash', displayName: 'Gemini 2.5 Flash (推荐)' },
+          { name: 'models/gemini-2.5-pro', displayName: 'Gemini 2.5 Pro' },
+          { name: 'models/gemini-2.0-flash', displayName: 'Gemini 2.0 Flash' },
+          { name: 'models/gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
+          { name: 'models/gemini-1.5-pro', displayName: 'Gemini 1.5 Pro' }
+        ]
+      };
+      return new Response(JSON.stringify(models), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     // --- 端点 2: Gemini 对话 ---
@@ -48,11 +47,15 @@ export default {
           contents: body.contents
         };
 
+        // 分别尝试 query param 和 header 两种方式
         const resp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': env.GEMINI_API_KEY
+            },
             body: JSON.stringify(geminiBody)
           }
         );
