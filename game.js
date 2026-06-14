@@ -386,42 +386,38 @@ function buildEndingHtml() {
 // 5. API 通信与对话系统 (保持稳定)
 // ==========================================
 async function detectModels() {
-    // 通过 Worker 代理获取模型列表，无需用户手动输入 API Key
+    const select = document.getElementById('model-select');
+    const status = document.getElementById('model-status');
     try {
         const response = await fetch(`${WORKER_URL}/models`);
         const data = await response.json();
-        const select = document.getElementById('model-select');
         select.innerHTML = '';
         if (data.models) {
             data.models.forEach(m => {
-                if(m.name.includes('gemini')) {
-                    const opt = document.createElement('option');
-                    opt.value = m.name.replace('models/', '');
-                    opt.text = m.displayName || m.name;
-                    select.appendChild(opt);
-                }
-            });
-        }
-        // 如果 Worker 不可用，提供默认模型选项
-        if (select.innerHTML === '') {
-            ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'].forEach(m => {
                 const opt = document.createElement('option');
-                opt.value = m;
-                opt.text = m;
+                opt.value = m.name.replace('models/', '');
+                opt.text = m.displayName || m.name;
                 select.appendChild(opt);
             });
         }
-        select.style.display = 'inline-block';
-    } catch (err) {
-        console.warn("Worker 模型检测失败，使用默认模型列表", err);
-        const select = document.getElementById('model-select');
+        if (select.options.length > 0) {
+            select.selectedIndex = 0;
+            if (status) status.innerText = "✅ AI 服务连接成功";
+            select.style.display = 'inline-block';
+        } else {
+            throw new Error("No models returned");
+        }
+    } catch (err) { 
+        console.warn("❌ 模型加载失败，使用默认列表", err);
+        if (status) status.innerText = "⚠️ 自动连接失败，使用内置线路";
         select.innerHTML = '';
-        ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'].forEach(m => {
+        ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'].forEach(m => {
             const opt = document.createElement('option');
             opt.value = m;
             opt.text = m;
             select.appendChild(opt);
         });
+        select.selectedIndex = 0;
         select.style.display = 'inline-block';
     }
 }
