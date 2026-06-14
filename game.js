@@ -489,7 +489,35 @@ function updateStatusDisplay() {
     }
 }
 
-function initAll() { showP('p-setup'); }
+// 初始化：显示设置界面
+function initAll() { 
+    detectModels();
+    showP('p-setup'); 
+}
+
+// 切换面板的通用函数
+function showP(id) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) {
+        target.classList.add('active');
+    } else {
+        console.error("找不到 ID 为 " + id + " 的面板");
+    }
+}
+
+// 卷轴弹窗控制
+function showScroll() {
+    document.getElementById('scroll-modal').style.display = 'flex';
+    playEffect();
+}
+
+function closeScroll() {
+    document.getElementById('scroll-modal').style.display = 'none';
+    playEffect();
+}
+
+// 请确保这是文件的最后一行，后面不要再有任何符号了
 
 function goNaming() {
     const count = document.getElementById('g-count').value;
@@ -521,41 +549,9 @@ function renderMenu() {
     });
 }
 
-// --- 修正后的 game.js 底部代码 ---
-
-// 处理回车键发送消息 (对应 index.html 中的 onkeypress)
 function handleEnter(event) {
     if (event.key === "Enter") {
         const inp = document.getElementById('ai-input');
         if (inp && !inp.disabled && aiCnt < 3) chatWithKing();
     }
 }
-
-// 初始化：显示设置界面
-function initAll() { 
-    showP('p-setup'); 
-}
-
-// 切换面板的通用函数
-function showP(id) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById(id);
-    if (target) {
-        target.classList.add('active');
-    } else {
-        console.error("找不到 ID 为 " + id + " 的面板");
-    }
-}
-
-// 卷轴弹窗控制
-function showScroll() {
-    document.getElementById('scroll-modal').style.display = 'flex';
-    playEffect();
-}
-
-function closeScroll() {
-    document.getElementById('scroll-modal').style.display = 'none';
-    playEffect();
-}
-
-// 请确保这是文件的最后一行，后面不要再有任何符号了

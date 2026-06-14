@@ -11,14 +11,14 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': 'https://chewyenhan.github.io',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type'
         }
       });
     }
 
-    const corsHeaders = { 'Access-Control-Allow-Origin': '*' };
+    const corsHeaders = { 'Access-Control-Allow-Origin': 'https://chewyenhan.github.io' };
 
     // --- 端点 1: 获取模型列表（内置常用模型，避免免费 Key 无法调用 list 接口）---
     if (url.pathname === '/models' && request.method === 'GET') {
