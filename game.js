@@ -11,7 +11,9 @@ const gameState = {
     choiceHistory: []    // 关键选择记录，用于结局复盘
 };
 
-// Cloudflare Worker 代理地址（部署后替换为实际 URL）
+let customApiKey = 'worker'; // Worker 模式，无需手动输入 Key
+
+// Cloudflare Worker 代理地址
 const WORKER_URL = 'https://paris-ai.chewyenhan.workers.dev';
 let gData = []; let cIdx = -1; let aiCnt = 0;
 let speechVolume = 0.8;

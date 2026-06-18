@@ -1,26 +1,44 @@
 // ==========================================
-// Cloudflare Worker — 1789 巴黎生存指南 Gemini API 代理
-// 把 API Key 藏在 Worker 环境变量里，学生无需手动输入
+// Cloudflare Worker — 1789 巴黎生存指南 Gemini API 安全代理
+// 1. 把 API Key 藏在 Worker 环境变量里，学生无需手动输入
+// 2. 限制调用来源，仅放行正式发布的 GitHub Pages 域名及本地调试域名
 // ==========================================
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
+    const origin = request.headers.get('Origin') || '';
+
+    // --- 安全验证：域名白名单过滤 ---
+    const isAllowed =
+      origin === 'https://chewyenhan.github.io' ||
+      origin.startsWith('http://localhost') ||
+      origin.startsWith('http://127.0.0.1') ||
+      origin === 'null' || // 允许双击本地 html 文件直接运行 (Origin 为 "null")
+      origin === '';       // 允许无 Origin 的直接调用 (如 curl 测试)
+
+    if (!isAllowed) {
+      return new Response('CORS Blocked: Unauthorized Origin', {
+        status: 403,
+        headers: { 'Content-Type': 'text/plain' }
+      });
+    }
+
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': origin || '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    };
 
     // --- CORS 预检 ---
     if (request.method === 'OPTIONS') {
       return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin': 'https://chewyenhan.github.io',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        }
+        headers: corsHeaders
       });
     }
 
-    const corsHeaders = { 'Access-Control-Allow-Origin': 'https://chewyenhan.github.io' };
+    const url = new URL(request.url);
 
-    // --- 端点 1: 获取模型列表（内置常用模型，避免免费 Key 无法调用 list 接口）---
+    // --- 端点 1: 获取模型列表 ---
     if (url.pathname === '/models' && request.method === 'GET') {
       const models = {
         models: [
@@ -43,11 +61,17 @@ export default {
         const model = body.model || 'gemini-2.5-flash';
 
         const geminiBody = {
-          system_instruction: body.system_instruction,
           contents: body.contents
         };
 
-        // 分别尝试 query param 和 header 两种方式
+        if (body.system_instruction) {
+          geminiBody.system_instruction = body.system_instruction;
+        }
+
+        if (body.generationConfig) {
+          geminiBody.generationConfig = body.generationConfig;
+        }
+
         const resp = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
           {
@@ -64,7 +88,7 @@ export default {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       } catch (e) {
-        return new Response(JSON.stringify({ error: 'AI 请求失败' }), {
+        return new Response(JSON.stringify({ error: 'AI 请求失败: ' + e.message }), {
           status: 502,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
